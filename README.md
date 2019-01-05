@@ -20,3 +20,21 @@ gibo dump node visualstudiocode >> .gitignore
 dist/
 ```
 
+ESLint を削除、Prettier を追加
+
+```
+rm .eslintrc.js
+yarn remove eslint
+yarn remove eslint-config-kintone
+yarn add --dev prettier
+```
+
+`.prerrierrc` ファイルを追加
+
+```
+{
+  "singleQuote": true,
+  "trailingComma": "es5"
+}
+```
+

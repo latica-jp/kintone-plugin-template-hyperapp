@@ -24,7 +24,6 @@ gibo dump node visualstudiocode >> .gitignore
 `.gitignore` にパッケージングしたプラグインファイルが出力されるフォルダを追加します。
 
 ```
-### packaged plugin files
 dist/
 ```
 
@@ -132,6 +131,27 @@ module.exports = {
   },
 };
 ```
+
+プラグインのマニフェストファイル `src/manifest.json` を修正して、パッケージ対象コードをソースコードではなくトランスパイルしたコードにします。
+
+```
+  "desktop": {
+    "js": [
+      "https://js.cybozu.com/jquery/3.3.1/jquery.min.js",
+      "dist/desktop.js"
+    ],
+```
+
+```
+  "config": {
+    "html": "html/config.html",
+    "js": [
+      "https://js.cybozu.com/jquery/3.3.1/jquery.min.js",
+      "dist/config.js"
+    ],
+```
+
+なお、出力先の `src/dist` ディレクトリは `.gitignore` ですでに `dist/` が指定されているため、改めての指定は不要です。
 
 `package.json` ファイルの `scripts` セクションを改変します。
 

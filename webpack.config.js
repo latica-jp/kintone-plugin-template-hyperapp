@@ -1,6 +1,6 @@
 const webpack = require('webpack');
 const path = require('path');
-const kintonePlugin = require('@kintone/webpack-plugin-kintone-plugin');
+const KintonePlugin = require('@kintone/webpack-plugin-kintone-plugin');
 
 module.exports = {
   mode: 'development', // ビルド時の process.env.NODE_ENV を development に設定
@@ -41,15 +41,15 @@ module.exports = {
     ],
   },
   plugins: [
-    new kintonePlugin({
-      manifestJSONPath: './src/manifest.json',
-      privateKeyPath: './private.ppk',
-      pluginZipPath: './dist/plugin.zip',
-    }),
     // import なしに jQuery モジュールをロードする
     // see: https://webpack.js.org/plugins/provide-plugin/
     new webpack.ProvidePlugin({
       $: 'jquery',
+    }),
+    new KintonePlugin({
+      manifestJSONPath: './src/manifest.json',
+      privateKeyPath: './private.ppk',
+      pluginZipPath: './dist/plugin.zip',
     }),
   ],
   // jQuery を外部モジュールからロードする

@@ -91,3 +91,4 @@ typings/
 !.vscode/extensions.json
 
 dist/
+.ppk

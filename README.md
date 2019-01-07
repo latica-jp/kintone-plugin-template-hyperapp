@@ -2,11 +2,48 @@
 
 kintone 公式から配布されている create-plugin パッケージは node 環境を使用したモダンな kintone プラグイン開発環境を提供しています。
 
+このテンプレートは create-plugin パッケージで作成したプロジェクトに webpack + babel による ES6 対応などを加えたものです。
+
+## 使いかた
+
+```
+git clone https://github.com/latica-jp/kintone-plugin-template.git sample
+cd sample
+yarn
+```
+`.env` ファイルを作成し、kintone プラグインのアップロード情報を入力します。
+
+```
+KINTONE_DOMAIN=domain.cybozu.com
+KINTONE_USERNAME=username
+KINTONE_PASSWORD=password
+```
+
+プラグインのビルド（コードのプリコンパイル、プラグインのパッケージング）は下記のコマンドを入力します。
+
+```
+yarn build
+```
+
+プラグインのアップロードは、下記のコマンドを入力します。
+
+```
+yarn upload
+```
+
+下記のコマンドを入力すると、ソースコードの変更を検知して自動的にビルドとアップロードを行います。開発時に便利です。
+
+```
+yarn start
+```
+
+## このテンプレートの作成過程
+
 このテンプレートは create-plugin パッケージで作成したプロジェクトに latica が以下の手順で webpack + babel による ES6 対応などを加えたものです。
 
-## プラグインプロジェクトの作成
+### プラグインプロジェクトの作成
 
-create-plugin パッケージを使用してプロジェクトを作成します。
+create-plugin パッケージを使用してプロジェクトを作成
 
 ```
 npx @kintone/create-plugin kintone-plugin-template
@@ -14,20 +51,20 @@ cd kintone-plugin-template
 yarn
 ```
 
-`.gitignore` を生成します。
+`.gitignore` を生成
 
 ```
 brew install gibo
 gibo dump node visualstudiocode >> .gitignore
 ```
 
-`.gitignore` にパッケージングしたプラグインファイルが出力されるフォルダを追加します。
+`.gitignore` にパッケージングしたプラグインファイルが出力されるフォルダを追加
 
 ```
 dist/
 ```
 
-ESLint を削除、Prettier を追加します。
+ESLint を削除、Prettier を追加
 
 ```
 rm .eslintrc.js
@@ -36,7 +73,7 @@ yarn remove eslint-config-kintone
 yarn add --dev prettier
 ```
 
-`.prerrierrc` ファイルを追加します。
+`.prerrierrc` ファイルを追加
 
 ```
 {
@@ -45,11 +82,11 @@ yarn add --dev prettier
 }
 ```
 
-## Webpack 環境の構築
+### Webpack 環境の構築
 
-[こちらの記事](https://qiita.com/yamaryu0508/items/fa68fb83dabd04fae3cc)を参考にいくらかの追加／修正事項を入れて Webpack 環境を構築します。
+[こちらの記事](https://qiita.com/yamaryu0508/items/fa68fb83dabd04fae3cc)を参考にいくらかの追加／修正事項を入れて Webpack 環境を構築
 
-必要なパッケージをインストールします。
+必要なパッケージをインストール
 
 ```
 yarn add --dev webpack webpack-cli
@@ -58,9 +95,9 @@ yarn add --dev @kintone/webpack-plugin-kintone-plugin
 yarn add --dev core-js
 ```
 
-`webpack.config.js` ファイルを作成します。
+`webpack.config.js` ファイルを作成
 
-前述の記事からの主な変更点は下記のとおりです。
+前述の記事からの主な変更点は下記のとおり
 
 - 出力パスを変更
 - @babel/preset-env の設定に以下を追加
@@ -132,7 +169,7 @@ module.exports = {
 };
 ```
 
-プラグインのマニフェストファイル `src/manifest.json` を修正して、パッケージ対象コードをソースコードではなくトランスパイルしたコードにします。
+プラグインのマニフェストファイル `src/manifest.json` を修正して、パッケージ対象コードをソースコードではなくトランスパイルしたコードにする
 
 ```
   "desktop": {
@@ -151,36 +188,33 @@ module.exports = {
     ],
 ```
 
-なお、出力先の `src/dist` ディレクトリは `.gitignore` ですでに `dist/` が指定されているため、改めての指定は不要です。
+なお、出力先の `src/dist` ディレクトリは `.gitignore` ですでに `dist/` が指定されているため、改めての指定は不要。
 
-`package.json` ファイルの `scripts` セクションを改変します。
+`package.json` ファイルの `scripts` セクションを改変
 
-webpack による js ファイルのトランスパイル処理が入るため、必要なスクリプトを追加します。
+- webpack による js ファイルのトランスパイル処理が入るため、スクリプト `run-webpack`を追加
 
-また、もとのスクリプトはコードの改変を watch してパッケージングとアップロードを自動化することを意図しているので、トランスパイルも含めた入れた自動プロセスを作成します。
+- 初回ビルド時にプラグインのキーファイルを生成する必要があるので、必要なスクリプト `prepare`を追加
+- `npm run build -- --watch` のような指定方法は、`--` につづくコマンドラインオプションを `build` スクリプトに渡す。
 
 ```
   "scripts": {
     "start": "node scripts/npm-start.js",
+    "prepare": "node scripts/checkKeyFile.js",
     "upload": "env-cmd ./.env kintone-plugin-uploader dist/plugin.zip --watch --waiting-dialog-ms 3000",
-    "develop": "npm-run-all \"babel -- --watch\" \"package -- --watch\"",
-    "build": "npm-run-all babel package",
-    "babel": "webpack --mode development",
-    "package": "kintone-plugin-packer --ppk private.ppk --out dist/plugin.zip src"
+    "run-webpack": "webpack --mode development",
+    "develop": "npm-run-all \"prepare\" \"run-webpack -- --watch\"",
+    "build": "npm-run-all \"prepare\" \"run-webpack\""
   },
 ```
 
-`start` スクリプトは npm-run-all パッケージを使用して `develop` と `upload` を実行しています。そこで、`develop` スクリプトを改変して babel によるとトランスパイルと kintone-plugin-packer によるパッケージングを行うようにします。この際、並行ではなく順次実行を行います。
-
-なお、`npm run build -- --watch` のような指定方法は、`--` につづくコマンドラインオプションを `build` スクリプトに渡します。 
-
-また、plugin-uploader はアップロード先を環境変数で指定できるようになっていますので、プラグインのアップロードに先立って `.env` ファイルから環境変数を読み込むようにします。前提として env-cmd パッケージのインストールが必要です。
+また、plugin-uploader はアップロード先を環境変数で指定できるようになっているので、プラグインのアップロードに先立って `.env` ファイルから環境変数を読み込むようにする。前提として env-cmd パッケージのインストールが必要。
 
 ```
 yarn add --dev env-cmd
 ```
 
-`.env ` ファイルを作成します。
+`.env ` ファイルを作成
 
 ```
 KINTONE_DOMAIN=domain.cybozu.com

@@ -5,9 +5,8 @@
     "start": "node scripts/npm-start.js",
     "prepare": "node scripts/checkKeyFile.js",
     "upload": "env-cmd ./.env kintone-plugin-uploader dist/plugin.zip --watch --waiting-dialog-ms 3000",
-    "run-webpack": "webpack --mode development",
-    "develop": "npm-run-all \"prepare\" \"run-webpack -- --watch\"",
-    "build": "npm-run-all \"prepare\" \"run-webpack\""
+    "develop": "npm run build -- --watch",
+    "build": "webpack"
   },
   "devDependencies": {
     "@babel/core": "^7.2.2",

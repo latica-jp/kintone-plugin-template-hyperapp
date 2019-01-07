@@ -192,23 +192,21 @@ module.exports = {
 
 `package.json` ファイルの `scripts` セクションを改変
 
-- webpack による js ファイルのトランスパイル処理が入るため、スクリプト `run-webpack`を追加
-
+- `build` を webpack に変更
 - 初回ビルド時にプラグインのキーファイルを生成する必要があるので、必要なスクリプト `prepare`を追加
-- `npm run build -- --watch` のような指定方法は、`--` につづくコマンドラインオプションを `build` スクリプトに渡す。
+- `npm run build -- --watch` のような指定方法は、`--` につづくコマンドラインオプションを `build` スクリプトに渡す
 
 ```
   "scripts": {
     "start": "node scripts/npm-start.js",
     "prepare": "node scripts/checkKeyFile.js",
     "upload": "env-cmd ./.env kintone-plugin-uploader dist/plugin.zip --watch --waiting-dialog-ms 3000",
-    "run-webpack": "webpack --mode development",
-    "develop": "npm-run-all \"prepare\" \"run-webpack -- --watch\"",
-    "build": "npm-run-all \"prepare\" \"run-webpack\""
+    "develop": "npm run build -- --watch",
+    "build": "webpack"
   },
 ```
 
-また、plugin-uploader はアップロード先を環境変数で指定できるようになっているので、プラグインのアップロードに先立って `.env` ファイルから環境変数を読み込むようにする。前提として env-cmd パッケージのインストールが必要。
+また、plugin-uploader はアップロード先を環境変数で指定できるようになっているので、プラグインのアップロードに先立って `.env` ファイルから環境変数を読み込むようにする。前提として env-cmd パッケージのインストールが必要
 
 ```
 yarn add --dev env-cmd

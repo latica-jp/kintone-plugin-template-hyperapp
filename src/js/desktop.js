@@ -2,12 +2,12 @@
 const PLUGIN_ID = kintone.$PLUGIN_ID;
 
 kintone.events.on('app.record.index.show', () => {
-  var config = kintone.plugin.app.getConfig(PLUGIN_ID);
+  const config = kintone.plugin.app.getConfig(PLUGIN_ID);
 
-  var spaceElement = kintone.app.getHeaderSpaceElement();
-  var fragment = document.createDocumentFragment();
-  var headingEl = document.createElement('h3');
-  var messageEl = document.createElement('p');
+  const spaceElement = kintone.app.getHeaderSpaceElement();
+  const fragment = document.createDocumentFragment();
+  const headingEl = document.createElement('h3');
+  const messageEl = document.createElement('p');
 
   messageEl.classList.add('plugin-space-message');
   messageEl.textContent = config.message;

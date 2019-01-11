@@ -1,8 +1,10 @@
-# kintone プラグイン開発テンプレート
+# kintone プラグイン開発テンプレート with HyperApp
 
 kintone 公式から配布されている create-plugin パッケージは node 環境を使用したモダンな kintone プラグイン開発環境を提供しています。
 
 このテンプレートは create-plugin パッケージで作成したプロジェクトに webpack + babel による ES6 対応などを加えたものです。
+
+また、設定画面の表示や動作に超軽量な View ライブラリである [HyperApp](https://github.com/jorgebucaran/hyperapp) を使用しています。
 
 ## 使いかた
 
@@ -219,4 +221,19 @@ KINTONE_DOMAIN=domain.cybozu.com
 KINTONE_USERNAME=username
 KINTONE_PASSWORD=password
 ```
+
+## Hyperapp
+
+Hyperapp は非常に軽量な JavaScript View ライブラリです。
+
+kintone のカスタマイズやプラグイン開発において、画面表示や動作にフロントエンド用のフレームワークを使用したいケースがあります。この場合、Vue や React を使用するケースが多いようです。
+
+kintone のカスタマイズやプラグイン開発は、アプリケーションとしては比較的、小規模なものが多いと考えられます。こうしたニーズに対して、ここでは非常に軽量で導入が容易な Hyperapp の利用を提案しています。
+
+### 公式サンプル に HyperApp を追加する
+
+このサンプルは、kintone から公式に提供されている [create-plugin](https://github.com/kintone/create-plugin) パッケージで出力したプロジェクトをベースにしています。
+
+Webpack + ES6 対応については、[このプロジェクトのテンプレート](https://github.com/latica-jp/kintone-plugin-template) を参照してください。
+
 

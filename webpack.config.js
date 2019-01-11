@@ -36,6 +36,16 @@ module.exports = {
               },
             ],
           ],
+          // jsx を hyperapp 仕様に変換
+          // see: https://github.com/jorgebucaran/hyperapp
+          plugins: [
+            [
+              '@babel/plugin-transform-react-jsx',
+              {
+                pragma: 'h',
+              },
+            ],
+          ],
         },
       },
     ],
@@ -56,5 +66,6 @@ module.exports = {
   // see: https://webpack.js.org/configuration/externals/#externals
   externals: {
     jquery: 'jQuery',
+    hyperapp: 'hyperapp',
   },
 };

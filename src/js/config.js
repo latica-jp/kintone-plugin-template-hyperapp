@@ -1,21 +1,33 @@
-// jQuery は webpack がロード
+// jQuery, hyperapp は webpack がロード
+import Config from './components/Config';
+
 const PLUGIN_ID = kintone.$PLUGIN_ID;
 
-const $form = $('.js-submit-settings');
-const $message = $('.js-text-message');
+const config = kintone.plugin.app.getConfig(PLUGIN_ID);
 
 const getSettingsUrl = () => {
   return '/k/admin/app/flow?app=' + kintone.app.getId();
 };
 
-const config = kintone.plugin.app.getConfig(PLUGIN_ID);
-if (config.message) {
-  $message.val(config.message);
-}
-$form.on('submit', e => {
-  e.preventDefault();
-  kintone.plugin.app.setConfig({ message: $message.val() }, () => {
+const setConfig = state => {
+  kintone.plugin.app.setConfig({ message: state.message }, () => {
     alert('Please update the app!');
     window.location.href = getSettingsUrl();
   });
-});
+};
+
+const state = {
+  message: config.message,
+};
+
+const actions = {
+  messageChanged: event => ({ message: event.target.value }),
+  submit: () => state => setConfig(state),
+};
+
+hyperapp.app(
+  state,
+  actions,
+  Config,
+  document.getElementById('kintone-plugin-config')
+);

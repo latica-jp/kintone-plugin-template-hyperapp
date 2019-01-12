@@ -1,20 +1,12 @@
-// jQuery は webpack がロード
+// jQuery, hyperapp は webpack がロード
+import Message from './components/Message';
+
 const PLUGIN_ID = kintone.$PLUGIN_ID;
+const config = kintone.plugin.app.getConfig(PLUGIN_ID);
+
+const state = { message: config.message };
 
 kintone.events.on('app.record.index.show', () => {
-  const config = kintone.plugin.app.getConfig(PLUGIN_ID);
-
   const spaceElement = kintone.app.getHeaderSpaceElement();
-  const fragment = document.createDocumentFragment();
-  const headingEl = document.createElement('h3');
-  const messageEl = document.createElement('p');
-
-  messageEl.classList.add('plugin-space-message');
-  messageEl.textContent = config.message;
-  headingEl.classList.add('plugin-space-heading');
-  headingEl.textContent = 'Hello kintone plugin!';
-
-  fragment.appendChild(headingEl);
-  fragment.appendChild(messageEl);
-  spaceElement.appendChild(fragment);
+  hyperapp.app(state, {}, Message, spaceElement);
 });

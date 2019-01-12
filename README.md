@@ -230,10 +230,181 @@ kintone のカスタマイズやプラグイン開発において、画面表示
 
 kintone のカスタマイズやプラグイン開発は、アプリケーションとしては比較的、小規模なものが多いと考えられます。こうしたニーズに対して、ここでは非常に軽量で導入が容易な Hyperapp の利用を提案しています。
 
-### 公式サンプル に HyperApp を追加する
+なお、Hyperapp は軽量ですが、kintone プラグインの容量制限を考慮して外部ライブラリとして読みこんでいます。
 
-このサンプルは、kintone から公式に提供されている [create-plugin](https://github.com/kintone/create-plugin) パッケージで出力したプロジェクトをベースにしています。
+### Hyperapp 対応に必要な作業
 
-Webpack + ES6 対応については、[このプロジェクトのテンプレート](https://github.com/latica-jp/kintone-plugin-template) を参照してください。
+JSX をトランスパイルするための babel プラグインを追加
 
+```
+yarn add --dev @babel/plugin-transform-react-jsx
+```
 
+`config.html`：hyperapp の描画ルートを定義
+
+```
+<div id="kintone-plugin-config"></div>
+```
+
+`manifest.json`：hyperapp のライブラリを追加
+
+```
+  "desktop": {
+    "js": [
+      "https://js.cybozu.com/jquery/3.3.1/jquery.min.js",
+      "https://cdnjs.cloudflare.com/ajax/libs/hyperapp/1.2.9/hyperapp.js",
+      "dist/desktop.js"
+    ...
+  "config": {
+    "html": "html/config.html",
+    "js": [
+      "https://js.cybozu.com/jquery/3.3.1/jquery.min.js",
+      "https://cdnjs.cloudflare.com/ajax/libs/hyperapp/1.2.9/hyperapp.js",
+    ...
+```
+
+`webpack.config.js`：JSX のトランスパイル、Hyperapp を外部モジュールとして定義
+
+```js
+module.exports = {
+  ...
+  module: {
+    rules: [
+      {
+        test: /\.js$/,
+        exclude: /node_modules/,
+        loader: 'babel-loader',
+        options: {
+          ...
+          // jsx を hyperapp 仕様に変換
+          // see: https://github.com/jorgebucaran/hyperapp
+          plugins: [
+            [
+              '@babel/plugin-transform-react-jsx',
+              {
+                pragma: 'h',
+              },
+            ],
+          ],
+        },
+      },
+    ],
+  },
+  ...
+  externals: {
+    jquery: 'jQuery',
+    hyperapp: 'hyperapp',
+  },
+};
+
+```
+
+`config.html`：hyperapp の View を表示する要素のみ
+
+```jsx
+<div id="kintone-plugin-config"></div>
+```
+
+`config.js`：hyperapp の `state`、`actions` を定義。設定画面はコンポーネントとして切り出し
+
+```jsx
+// jQuery, hyperapp は webpack がロード
+import Config from './components/Config';
+
+const PLUGIN_ID = kintone.$PLUGIN_ID;
+
+const config = kintone.plugin.app.getConfig(PLUGIN_ID);
+
+const getSettingsUrl = () => {
+  return '/k/admin/app/flow?app=' + kintone.app.getId();
+};
+
+const setConfig = state => {
+  kintone.plugin.app.setConfig({ message: state.message }, () => {
+    alert('Please update the app!');
+    window.location.href = getSettingsUrl();
+  });
+};
+
+const state = {
+  message: config.message,
+};
+
+const actions = {
+  messageChanged: event => ({ message: event.target.value }),
+  submit: () => state => setConfig(state),
+};
+
+hyperapp.app(
+  state,
+  actions,
+  Config,
+  document.getElementById('kintone-plugin-config')
+);
+
+```
+
+`components/Config.js`：コンポーネント化した設定画面
+
+```jsx
+import { h } from 'hyperapp';
+
+const Config = (state, actions) => (
+  <section class="settings">
+    <h2 class="settings-heading">Settings for kintone-plugin-template</h2>
+    <p class="kintoneplugin-desc">
+      This message is displayed on the app page after the app has been updated.
+    </p>
+    <p class="kintoneplugin-row">
+      <label for="message">
+        Message:
+        <input
+          type="text"
+          value={state.message}
+          onchange={actions.messageChanged}
+          class="js-text-message kintoneplugin-input-text"
+        />
+      </label>
+    </p>
+    <p class="kintoneplugin-row">
+      <button class="kintoneplugin-button-normal" onclick={actions.submit}>
+        Save
+      </button>
+    </p>
+  </section>
+);
+
+export default Config;
+```
+
+`desktop.js`：一覧への表示画面
+
+```jsx
+// jQuery, hyperapp は webpack がロード
+import Message from './components/Message';
+
+const PLUGIN_ID = kintone.$PLUGIN_ID;
+const config = kintone.plugin.app.getConfig(PLUGIN_ID);
+
+const state = { message: config.message };
+
+kintone.events.on('app.record.index.show', () => {
+  const spaceElement = kintone.app.getHeaderSpaceElement();
+  hyperapp.app(state, {}, Message, spaceElement);
+});
+```
+
+`components/Message.js`：コンポーネント化したメッセージ
+
+```jsx
+import { h } from 'hyperapp';
+
+const Message = state => (
+  <div>
+    <h3 class="plugin-space-heading">Hello, kintone plugin!</h3>
+    <p class="plugin-space-message">{state.message}</p>
+  </div>
+);
+
+export default Message;
+```

@@ -2,7 +2,6 @@
 import Config from './components/Config';
 
 const PLUGIN_ID = kintone.$PLUGIN_ID;
-
 const config = kintone.plugin.app.getConfig(PLUGIN_ID);
 
 const getSettingsUrl = () => {
